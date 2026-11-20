@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>2026 APR Rating Calibration Quiz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme: light;
+  --paper:#F7F9FA; --surface:#FFFFFF; --ink:#18222D; --muted:#5A6672; --line:#D9E0E5;
+  --teal:#0F766E; --teal-soft:#E3F2F0;
+  --r1:#B4413C; --r2:#A86B12; --r3:#0F766E; --r4:#3B4BA8;
+  --r1-soft:#F8E7E6; --r2-soft:#F6EEDC; --r3-soft:#E3F2F0; --r4-soft:#E7E9F7;
+  --wrong:#B4413C; --wrong-soft:#F8E7E6;
+  --sans:"Instrument Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --serif:"Source Serif 4", Georgia, "Times New Roman", serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --paper:#141A20; --surface:#1C242C; --ink:#E8EDF1; --muted:#9AA6B1; --line:#2E3A45;
+    --teal:#4FC1B4; --teal-soft:#16332F;
+    --r1:#E58A84; --r2:#E0AE5C; --r3:#4FC1B4; --r4:#93A0F0;
+    --r1-soft:#3A2221; --r2-soft:#352B19; --r3-soft:#16332F; --r4-soft:#232845;
+    --wrong:#E58A84; --wrong-soft:#3A2221;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --paper:#141A20; --surface:#1C242C; --ink:#E8EDF1; --muted:#9AA6B1; --line:#2E3A45;
+  --teal:#4FC1B4; --teal-soft:#16332F;
+  --r1:#E58A84; --r2:#E0AE5C; --r3:#4FC1B4; --r4:#93A0F0;
+  --r1-soft:#3A2221; --r2-soft:#352B19; --r3-soft:#16332F; --r4-soft:#232845;
+  --wrong:#E58A84; --wrong-soft:#3A2221;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;min-height:100%;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:17px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:760px;margin:0 auto;padding:40px 24px 64px}
+.brand{font-size:14px;color:var(--muted);margin:0 0 40px;display:flex;align-items:center;gap:10px}
+.brand{gap:14px}.brand .logo{display:inline-flex;background:#FFFFFF;border-radius:8px;padding:6px 10px}.brand .logo img{display:block;width:180px;height:auto}.brand .sep{width:1px;height:20px;background:var(--line)}
+h1{font-size:clamp(32px,5.5vw,48px);line-height:1.08;letter-spacing:-0.02em;margin:0 0 18px;font-weight:700;max-width:16ch}
+.lead{font-size:19px;color:var(--muted);max-width:58ch;margin:0 0 36px}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible{outline:3px solid var(--teal);outline-offset:3px}
+
+/* the scale: signature element */
+.scale{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border:1.5px solid var(--line);border-radius:14px;overflow:hidden;background:var(--surface)}
+.scale.demo{margin:0 0 40px;pointer-events:none}
+.seg{border:0;background:transparent;padding:18px 14px 16px;text-align:left;border-left:1.5px solid var(--line);position:relative;min-height:112px;display:flex;flex-direction:column;gap:6px;transition:background .15s}
+.seg:first-child{border-left:0}
+.seg .num{font-size:34px;font-weight:700;line-height:1;color:var(--c)}
+.seg .name{font-size:14px;line-height:1.3;font-weight:600}
+.seg .sub{font-size:13px;color:var(--muted);line-height:1.3}
+.seg[data-r="1"]{--c:var(--r1);--s:var(--r1-soft)}
+.seg[data-r="2"]{--c:var(--r2);--s:var(--r2-soft)}
+.seg[data-r="3"]{--c:var(--r3);--s:var(--r3-soft)}
+.seg[data-r="4"]{--c:var(--r4);--s:var(--r4-soft)}
+.seg:not([disabled]):hover{background:var(--s)}
+.seg::after{content:"";position:absolute;left:0;right:0;bottom:0;height:5px;background:var(--c);transform:scaleX(0);transform-origin:left;transition:transform .25s}
+.seg.is-answer{background:var(--s)}
+.seg.is-answer::after{transform:scaleX(1)}
+.seg.is-pick.is-wrong{background:var(--wrong-soft)}
+.seg .tag{font-size:12px;font-weight:600;margin-top:auto;padding-top:6px}
+.seg.is-answer .tag{color:var(--c)}
+.seg.is-pick.is-wrong .tag{color:var(--wrong)}
+.seg[disabled]{cursor:default}
+.seg[disabled]:not(.is-answer):not(.is-pick){opacity:.55}
+
+/* start */
+fieldset{border:0;padding:0;margin:0 0 24px}
+legend{font-weight:600;font-size:16px;margin-bottom:12px;padding:0}
+.choices{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.choice{border:1.5px solid var(--line);background:var(--surface);border-radius:12px;padding:16px 18px;text-align:left}
+.choice strong{display:block;font-size:17px;margin-bottom:2px}
+.choice span{font-size:14px;color:var(--muted)}
+.choice[aria-pressed="true"]{border-color:var(--teal);box-shadow:inset 0 0 0 1.5px var(--teal);background:var(--teal-soft)}
+.check{display:flex;gap:12px;align-items:flex-start;font-size:16px;margin:0 0 32px;cursor:pointer}
+.check input{width:20px;height:20px;margin:2px 0 0;accent-color:var(--teal);flex:none}
+.check small{display:block;color:var(--muted);font-size:14px}
+.primary{background:var(--teal);color:#fff;border:0;border-radius:10px;padding:14px 26px;font-weight:600;font-size:17px}
+:root[data-theme="dark"] .primary{color:#0D1B19}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .primary{color:#0D1B19}}
+.primary[disabled]{opacity:.4;cursor:not-allowed}
+.secondary{background:transparent;border:1.5px solid var(--line);border-radius:10px;padding:13px 22px;font-weight:600;font-size:16px}
+.note{font-size:14px;color:var(--muted);margin-top:28px;max-width:60ch}
+
+/* question */
+.progress{display:flex;justify-content:space-between;align-items:baseline;font-size:14px;color:var(--muted);margin-bottom:10px}
+.bar{height:4px;background:var(--line);border-radius:2px;margin-bottom:36px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--teal);transition:width .3s}
+.meta{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.chip{font-size:13px;font-weight:600;padding:4px 10px;border-radius:999px;background:var(--surface);border:1px solid var(--line)}
+.scenario{font-family:var(--serif);font-size:clamp(19px,2.6vw,22px);line-height:1.6;margin:0 0 28px;max-width:62ch}
+.ask{font-weight:600;margin:0 0 14px}
+.feedback{margin-top:24px;border-left:4px solid var(--fc);background:var(--surface);border-radius:0 12px 12px 0;padding:18px 22px}
+.feedback.ok{--fc:var(--teal)}
+.feedback.no{--fc:var(--wrong)}
+.feedback h2{font-size:19px;margin:0 0 8px;color:var(--fc)}
+.feedback p{margin:0 0 10px}
+.feedback p:last-child{margin-bottom:0}
+.feedback .tip{font-size:15px;color:var(--muted)}
+.actions{margin-top:24px;display:flex;gap:12px;flex-wrap:wrap}
+
+/* results */
+.big{font-size:clamp(40px,8vw,64px);font-weight:700;letter-spacing:-0.03em;line-height:1;margin:0 0 12px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:28px 0 36px}
+.stat{background:var(--surface);border:1.5px solid var(--line);border-radius:12px;padding:16px}
+.stat b{display:block;font-size:28px;line-height:1.1}
+.stat span{font-size:14px;color:var(--muted)}
+.review-wrap{overflow-x:auto;margin-bottom:32px}
+table{border-collapse:collapse;width:100%;font-size:15px;min-width:480px}
+th{text-align:left;font-weight:600;color:var(--muted);font-size:13px;padding:8px 10px;border-bottom:1.5px solid var(--line)}
+td{padding:10px;border-bottom:1px solid var(--line);vertical-align:top}
+td.n{font-weight:700;white-space:nowrap}
+.match{color:var(--teal);font-weight:600}
+.miss{color:var(--wrong);font-weight:600}
+.hidden{display:none}
+
+@media (max-width:620px){
+  .wrap{padding:28px 18px 48px}
+  .scale{grid-template-columns:1fr 1fr}
+  .seg:nth-child(3){border-left:0}
+  .seg:nth-child(n+3){border-top:1.5px solid var(--line)}
+  .seg{min-height:96px}
+  .choices{grid-template-columns:1fr}
+  .stats{grid-template-columns:1fr 1fr 1fr;gap:8px}
+  .stat{padding:12px}
+  .stat b{font-size:22px}
+}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<main class="wrap" id="app">
+  <p class="brand"><span class="logo"><img src="data:image/png;base64,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" alt="Apps Associates" width="180" height="21"></span><span class="sep" aria-hidden="true"></span>The People Team</p>
+
+  <!-- START -->
+  <section id="start">
+    <h1>Rate it the way the guide would.</h1>
+    <p class="lead">Each scenario describes someone’s year on one competency. Pick the rating that fits, then see how it lines up with the 2026 APR Competency Rating Guide, and why.</p>
+
+    <div class="scale demo" aria-hidden="true">
+      <div class="seg" data-r="1"><span class="num">1</span><span class="name">Unsatisfactory</span></div>
+      <div class="seg" data-r="2"><span class="num">2</span><span class="name">Needs Development</span></div>
+      <div class="seg is-answer" data-r="3"><span class="num">3</span><span class="name">Successfully Meets Expectations</span><span class="tag">The standard</span></div>
+      <div class="seg" data-r="4"><span class="num">4</span><span class="name">Exceeds Expectations</span></div>
+    </div>
+
+    <fieldset>
+      <legend>Which kind of role is closest to yours?</legend>
+      <div class="choices" role="group">
+        <button class="choice" data-track="delivery" aria-pressed="false"><strong>Delivery</strong><span>Client projects and support engagements</span></button>
+        <button class="choice" data-track="nondelivery" aria-pressed="false"><strong>Non-delivery</strong><span>Internal teams and the business</span></button>
+      </div>
+    </fieldset>
+    <label class="check"><input type="checkbox" id="pl"><span>Include people leadership scenarios<small>For people managers, who are also rated on Effective People Leadership</small></span></label>
+    <button class="primary" id="go" disabled>Start the quiz</button>
+    <p class="note">Takes about 10 minutes. Your answers stay in your browser and aren’t shared with anyone. Scenarios are illustrations: a real rating always reflects the full year and the conversations you’ve had with your manager.</p>
+  </section>
+
+  <!-- QUESTION -->
+  <section id="quiz" class="hidden" aria-live="polite">
+    <div class="progress"><span id="count"></span><span id="trackname"></span></div>
+    <div class="bar"><i id="barfill" style="width:0"></i></div>
+    <div class="meta"><span class="chip" id="comp"></span><span class="chip" id="role"></span></div>
+    <p class="scenario" id="scenario"></p>
+    <p class="ask">What rating fits this pattern across the year?</p>
+    <div class="scale" id="scale" role="group" aria-label="Rating">
+      <button class="seg" data-r="1"><span class="num">1</span><span class="name">Unsatisfactory</span><span class="tag"></span></button>
+      <button class="seg" data-r="2"><span class="num">2</span><span class="name">Needs Development</span><span class="tag"></span></button>
+      <button class="seg" data-r="3"><span class="num">3</span><span class="name">Successfully Meets Expectations</span><span class="tag"></span></button>
+      <button class="seg" data-r="4"><span class="num">4</span><span class="name">Exceeds Expectations</span><span class="tag"></span></button>
+    </div>
+    <div id="fb" class="hidden"></div>
+    <div class="actions hidden" id="nextwrap"><button class="primary" id="next">Next scenario</button></div>
+  </section>
+
+  <!-- RESULTS -->
+  <section id="results" class="hidden">
+    <p class="big" id="score"></p>
+    <p class="lead" id="verdict"></p>
+    <div class="stats">
+      <div class="stat"><b id="sExact"></b><span>Matched the guide</span></div>
+      <div class="stat"><b id="sOne"></b><span>One level off</span></div>
+      <div class="stat"><b id="sTwo"></b><span>Two or more off</span></div>
+    </div>
+    <h2 style="font-size:20px;margin:0 0 12px">Your answers</h2>
+    <div class="review-wrap"><table><thead><tr><th>Competency</th><th>Scenario</th><th>You</th><th>Guide</th></tr></thead><tbody id="review"></tbody></table></div>
+    <div class="actions">
+      <button class="primary" id="retake">Take it again</button>
+      <button class="secondary" id="other">Try the other role type</button>
+    </div>
+    <p class="note">Questions about how a rating applies to you? Talk with your manager, see the 2026 APR page on AppsCentral, or contact your HR Team.</p>
+  </section>
+</main>
+
+<script>
+const NAMES={1:"1 – Unsatisfactory",2:"2 – Needs Development",3:"3 – Successfully Meets Expectations",4:"4 – Exceeds Expectations"};
+
+const Q={
+delivery:[
+ {c:"Communication Skills",t:"Weekly status",a:3,
+  s:"A consultant sends a clear weekly status to the client with progress, risks and next steps. When a requirement is unclear, they ask the client to confirm it in writing before building. The client rarely has to chase them for an update. This has been their pattern all year.",
+  ok:"This is exactly what strong, reliable communication looks like: clear, on time and confirmed before work starts.",
+  no:"Clear status, confirmed requirements and no chasing is the full scope of the role done well. A 4 would mean advising the client and shaping how others communicate, not just communicating well on their own work."},
+ {c:"Teamwork & Collaboration",t:"Covering for a colleague",a:3,
+  s:"When a teammate goes on leave for two months, an associate takes over their module on top of their own. They work long hours and deliver both on time. Apart from that stretch, they’re a dependable, respectful teammate who shares knowledge when asked.",
+  ok:"Taking on more is real growth and deserves recognition in feedback and goals. On its own, it’s a strong 3, not a 4.",
+  no:"This is the “doing more vs. exceeding” distinction. Covering extra work is valuable growth, but a 4 needs impact beyond the work itself, such as fixing why the gap happened or making the team stronger.",
+  tipHigh:"Extra effort and long hours are easy to read as a 4. Ask what changed for the team or client because of it."},
+ {c:"Accountability & Responsibility",t:"Sprint deadlines",a:2,
+  s:"A developer usually delivers, but missed two sprint deadlines this year without warning the PM. Their code needed significant rework after peer review in several sprints. When asked about the delays, they explained them, but didn’t raise them in advance.",
+  ok:"Delivering most of the time, with missed deadlines and rework, is the inconsistent pattern a 2 describes.",
+  no:"The deciding detail is that deadlines slipped without warning, and work regularly needed rework. That’s an inconsistent pattern, which points to a 2. A 1 would mean the team lead regularly stepping in to get work done.",
+  tipHigh:"A 3 raises blockers before deadlines slip. Here, the PM found out after."},
+ {c:"Innovation & Creativity",t:"Migration checks",a:4,
+  s:"An associate uses AI to build a script that automates data-migration validation on their project, cutting testing time substantially. The practice adds it to its standard toolkit, three other projects now use it, and the associate runs two sessions teaching others how.",
+  ok:"Measurable results, adoption beyond their own project, and helping others use it: that’s exceptional impact.",
+  no:"Using AI to work smarter on your own project is a 3. Here, the tool changed how other teams work, with clear results and adoption across the practice, which is what makes it a 4.",
+  tipLow:"Ask how far the impact reached. When other teams adopt your idea, that’s the 3-to-4 shift."},
+ {c:"Corporate Compliance",t:"One late timesheet",a:3,
+  s:"A consultant submitted every timesheet on time this year except one week while traveling, which they corrected the next morning. All required trainings were completed before the deadline, and they check with the PM before sharing client documents.",
+  ok:"One issue, fixed quickly, doesn’t change the pattern. This is a reliable 3.",
+  no:"Ratings reflect the pattern across the year. A single late timesheet, corrected the next day, rarely moves a rating down.",
+  tipLow:"Watch for letting one slip outweigh a year of reliable compliance."},
+ {c:"Corporate Compliance",t:"Repeated reminders",a:1,
+  s:"Despite repeated reminders from their PM and the HR Team, an associate’s timesheets are regularly missing or late, delaying client invoices. Required data-privacy training is still incomplete months after the deadline. They also stored client files on a personal laptop after being told not to.",
+  ok:"Repeated misses after reminders, plus a policy breach that creates real risk, is a 1. It should also have been raised and documented well before the review.",
+  no:"A 2 is “sometimes late, completes after reminders.” This goes further: obligations are still missed despite reminders, and a data-handling policy was ignored, which creates risk. That’s a 1.",
+  tipHigh:"The policy breach after being told not to is the detail that separates a 1 from a 2."},
+ {c:"Communication Skills",t:"The go-live presentation",a:2,
+  s:"At go-live, an associate gives an excellent presentation to client executives. For most of the year, though, their status updates were late and too technical for the client, and the PM often had to rewrite them before sending. Requirements were sometimes misunderstood, causing rework.",
+  ok:"One great moment doesn’t outweigh a year of inconsistent communication. A 2 fits.",
+  no:"Recency bias can make one strong presentation feel like the whole year. The pattern is late, unclear updates and rework, which is a 2.",
+  tipHigh:"Rate the whole year, not the most memorable moment."},
+ {c:"Teamwork & Collaboration",t:"Onshore and offshore",a:4,
+  s:"All year, an associate coaches two junior offshore developers, both of whom now own modules on their own. When hand-offs between onshore and offshore teams keep failing, they set up a short overlap call and a shared tracker. Hand-off issues largely disappear, and other project teams copy the approach.",
+  ok:"Growing others, fixing how teams work together, and an approach others adopt: that’s a 4.",
+  no:"A 3 is a great teammate. Here, the associate made the team itself work better: they developed others’ skills and fixed a cross-team problem other projects now use.",
+  tipLow:"Look for mentoring that grows people, and improvements others adopt. Both are 4 signals."},
+ {c:"Accountability & Responsibility",t:"Missed deliverables",a:1,
+  s:"A deliverable promised to the client is missed three times this year. Each time, the team lead completes it to protect the client relationship. When problems come up, the associate tends to point to other people rather than own the issue.",
+  ok:"Regularly missed commitments, with the team lead stepping in, is a 1.",
+  no:"A 2 means sometimes missing deadlines or needing reminders. Here, commitments are regularly missed, the team lead has to do the work, and the associate doesn’t own mistakes. That’s a 1.",
+  tipHigh:"Frequent intervention from others is the clearest marker of a 1."}
+],
+deliveryPL:[
+ {c:"Effective People Leadership",t:"Busy project",a:2,
+  s:"During a demanding year-long project, a delivery manager cancels most 1:1s. Reviews are submitted on time, but one associate first hears about a performance concern in their annual review.",
+  ok:"On-time reviews don’t make up for irregular 1:1s and a gap raised for the first time in the review. That breaks the “no surprises” commitment, which points to a 2.",
+  no:"Timely paperwork is part of the role, but regular 1:1s and early feedback are too. A gap raised for the first time in the review is a process failure, which makes this a 2.",
+  tipHigh:"A 3 manager makes sure no one hears about a gap for the first time in their review."},
+ {c:"Effective People Leadership",t:"Steady support",a:3,
+  s:"A delivery manager holds 1:1s every two weeks, gives specific feedback as things happen, and completes every expectations check-in by Dec 18. When one associate is overloaded across two projects, they rebalance the work.",
+  ok:"Regular 1:1s, timely feedback and balanced workload are strong, reliable leadership.",
+  no:"This is solid people leadership done consistently, which is a 3. A 4 would add developing people into bigger roles and building a team that performs beyond any one person."}
+],
+nondelivery:[
+ {c:"Communication Skills",t:"System change emails",a:2,
+  s:"An IT associate announces several system changes this year in one-line emails with no date or expected impact. Each time, many people miss the change and the help desk fills with tickets. Their one-to-one communication with colleagues is generally clear.",
+  ok:"Generally clear, but with a repeated gap that causes real problems for others: that’s a 2.",
+  no:"The gap isn’t a one-off: several announcements missed key details, and others had to deal with the fallout. That inconsistent pattern points to a 2.",
+  tipHigh:"Being clear one-to-one is good, but the repeated broad announcements are part of the role too."},
+ {c:"Teamwork & Collaboration",t:"Year-end close",a:3,
+  s:"During year-end close, a Finance associate takes on part of a colleague’s reconciliations so the team meets the deadline, without being asked twice. They’re respectful in meetings and a reliable partner to other teams throughout the year.",
+  ok:"Sharing workload when the team is stretched and being a reliable partner is what a 3 looks like.",
+  no:"This is strong, dependable teamwork, which is a 3. A 4 would mean leading cross-team work or changing how teams work together."},
+ {c:"Accountability & Responsibility",t:"Onboarding gaps",a:4,
+  s:"A People Team associate delivers all of their own work on time. They also notice onboarding tasks falling between teams, map who owns each step with IT and Finance, and fix the gaps. New hires now start with equipment and access ready on day one.",
+  ok:"Owning the outcome beyond their own tasks and fixing the root cause is exceptional impact.",
+  no:"Delivering your own work on time is a 3. This associate went beyond it: they spotted a cross-team gap, fixed the root cause, and improved the experience for every new hire.",
+  tipLow:"Problems prevented and root causes fixed are the shifts from 3 to 4."},
+ {c:"Innovation & Creativity",t:"The old spreadsheet",a:2,
+  s:"An associate suggests a few process ideas in team meetings, but doesn’t follow up on any of them. After a new system is rolled out, they keep using their old spreadsheet for several months, until their manager asks them to switch.",
+  ok:"Ideas without follow-through, and reluctance to move to new tools, is a 2.",
+  no:"Offering ideas without developing them, and holding on to familiar tools, matches a 2. A 1 would mean actively resisting change or creating problems for others because of it."},
+ {c:"Corporate Compliance",t:"On time, all year",a:3,
+  s:"A People Team associate completes every required training on time, submits expenses accurately, meets their office attendance expectations, and handles associate records according to data-handling rules.",
+  ok:"Meeting every obligation reliably is a 3, the standard.",
+  no:"Doing everything correctly and on time is exactly what a 3 means. A 4 would mean helping others stay compliant or improving processes so compliance is easier for everyone.",
+  tipHigh:"Perfect compliance is the standard, not exceptional. A 4 reaches beyond your own obligations."},
+ {c:"Innovation & Creativity",t:"Newsletter drafts",a:3,
+  s:"A Marketing associate uses AI to draft first versions of internal newsletter articles, then edits them carefully, freeing time to cover more stories each issue. They also suggest a simpler approval step that their own team adopts.",
+  ok:"Using AI and small improvements to work smarter in your own team is a strong 3.",
+  no:"These are good, practical improvements, but they mainly improve the associate’s own work and team. A 4 would mean improvements adopted beyond their team, with clear results."},
+ {c:"Communication Skills",t:"Month-end update",a:4,
+  s:"A Finance associate redesigns the month-end close update so practice leaders see the three numbers they need at a glance. Follow-up questions to Finance drop noticeably, and two other teams adopt the format. All year, they anticipate what stakeholders will ask and answer it in advance.",
+  ok:"Communication that others act on without follow-up, and a format others reuse, is a 4.",
+  no:"A 3 communicates clearly about their own work. This associate changed how well others understand and decide, and their approach spread to other teams.",
+  tipLow:"From answering questions to anticipating them, and from clear messages to messages others reuse: those are 4 signals."},
+ {c:"Accountability & Responsibility",t:"Extra project",a:3,
+  s:"When a colleague leaves, an associate takes over their project on top of their own. They work some weekends and meet every deadline, with good quality. The rest of the year, they reliably deliver their assigned work and goals.",
+  ok:"Taking on more and delivering reliably is real growth, and a strong 3.",
+  no:"This is “doing more,” not “exceeding.” Extra scope delivered well should show up in feedback and stretch goals, but a 4 needs impact beyond the work, such as preventing problems or improving how the team delivers.",
+  tipHigh:"Working weekends to hit deadlines is effort. A 4 would anticipate the risk so the crunch doesn’t happen."},
+ {c:"Teamwork & Collaboration",t:"Shared files",a:1,
+  s:"Colleagues repeatedly escalate that an associate won’t share files and information the team needs, and shared projects stall as a result. Their manager has discussed it with them and documented it twice, with no change.",
+  ok:"Working in isolation in a way that stalls the team, after documented conversations, is a 1.",
+  no:"A 2 is uneven contribution or reluctance to help other teams. Here, the behavior disrupts the team’s work and hasn’t changed after documented conversations. That’s a 1.",
+  tipHigh:"No change after documented conversations is a clear 1 signal."}
+],
+nondeliveryPL:[
+ {c:"Effective People Leadership",t:"Cross-training plan",a:4,
+  s:"A Finance manager builds a cross-training plan so the team can cover for each other, gives regular specific recognition, and nominates two team members for AoQ. One team member grows into a lead role, retention is the strongest in the department, and the manager shares their approach with other managers.",
+  ok:"Growing people, high engagement and practices others adopt: that’s exceptional people leadership.",
+  no:"Regular 1:1s and clear goals make a 3. This manager grew someone into a bigger role, built a resilient team, and shaped how other managers lead.",
+  tipLow:"People developed into bigger roles and practices others adopt are the 3-to-4 shifts."},
+ {c:"Effective People Leadership",t:"Goals in PAM",a:2,
+  s:"A manager’s team doesn’t have goals in PAM until halfway through the year. Recognition is rare, development conversations happen occasionally, and a couple of HR actions are submitted late.",
+  ok:"Some effort, but inconsistent goals, feedback and people actions: that’s a 2.",
+  no:"The manager isn’t absent, but goals, recognition and people actions are inconsistent. That pattern matches a 2. A 3 sets clear goals early and completes people actions on time."}
+]};
+
+let track=null, deck=[], i=0, answers=[];
+const $=id=>document.getElementById(id);
+const show=id=>["start","quiz","results"].forEach(s=>$(s).classList.toggle("hidden",s!==id));
+
+document.querySelectorAll(".choice").forEach(b=>b.addEventListener("click",()=>{
+  document.querySelectorAll(".choice").forEach(x=>x.setAttribute("aria-pressed",x===b?"true":"false"));
+  track=b.dataset.track; $("go").disabled=false;
+}));
+$("go").addEventListener("click",()=>start(track));
+
+function start(t){
+  track=t;
+  deck=[...Q[t], ...($("pl").checked?Q[t+"PL"]:[])];
+  i=0; answers=[];
+  $("trackname").textContent=t==="delivery"?"Delivery roles":"Non-delivery roles";
+  show("quiz"); render(); window.scrollTo(0,0);
+}
+
+function render(){
+  const q=deck[i];
+  $("count").textContent=`Scenario ${i+1} of ${deck.length}`;
+  $("barfill").style.width=`${(i/deck.length)*100}%`;
+  $("comp").textContent=q.c;
+  $("role").textContent=q.c==="Effective People Leadership"?(track==="delivery"?"Delivery manager":"Non-delivery manager"):(track==="delivery"?"Delivery role":"Non-delivery role");
+  $("scenario").textContent=q.s;
+  document.querySelectorAll("#scale .seg").forEach(b=>{
+    b.disabled=false; b.className="seg"; b.querySelector(".tag").textContent="";
+  });
+  $("fb").className="hidden"; $("fb").innerHTML="";
+  $("nextwrap").classList.add("hidden");
+  $("next").textContent=i===deck.length-1?"See my results":"Next scenario";
+}
+
+document.querySelectorAll("#scale .seg").forEach(b=>b.addEventListener("click",()=>{
+  const q=deck[i], pick=+b.dataset.r, right=pick===q.a;
+  answers.push({q,pick});
+  document.querySelectorAll("#scale .seg").forEach(x=>{
+    x.disabled=true;
+    const r=+x.dataset.r;
+    if(r===q.a){x.classList.add("is-answer");x.querySelector(".tag").textContent=right?"Your pick, and the guide’s":"The guide’s rating";}
+    if(r===pick&&!right){x.classList.add("is-pick","is-wrong");x.querySelector(".tag").textContent="Your pick";}
+  });
+  const fb=$("fb");
+  if(right){
+    fb.className="feedback ok";
+    fb.innerHTML=`<h2>Spot on. This is a ${esc(NAMES[q.a])}.</h2><p>${esc(q.ok)}</p>`;
+  }else{
+    const dir=pick>q.a?"higher":"lower";
+    const tip=dir==="higher"?q.tipHigh:q.tipLow;
+    fb.className="feedback no";
+    fb.innerHTML=`<h2>Not quite. The guide rates this a ${esc(NAMES[q.a])}.</h2><p>You rated it ${dir}, at ${esc(NAMES[pick])}. ${esc(q.no)}</p>${tip?`<p class="tip">${esc(tip)}</p>`:""}`;
+  }
+  $("nextwrap").classList.remove("hidden");
+  $("next").focus({preventScroll:true});
+  fb.scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"nearest"});
+}));
+
+$("next").addEventListener("click",()=>{
+  if(i<deck.length-1){i++;render();window.scrollTo(0,0);}else results();
+});
+
+function results(){
+  const n=answers.length;
+  const exact=answers.filter(a=>a.pick===a.q.a).length;
+  const one=answers.filter(a=>Math.abs(a.pick-a.q.a)===1).length;
+  const two=n-exact-one;
+  const high=answers.filter(a=>a.pick>a.q.a).length, low=answers.filter(a=>a.pick<a.q.a).length;
+  $("score").textContent=`${exact} of ${n}`;
+  let v=exact/n>=0.8?"You’re well calibrated. You read the patterns the way the guide does."
+       :exact/n>=0.5?"You’re close. Review the scenarios you missed below, and the “From 3 to 4” notes in the guide."
+       :"There’s room to calibrate. Read through the guide’s examples for each competency, then try again.";
+  if(high>low+1) v+=" You tended to rate higher than the guide: check whether extra effort is being read as exceptional impact.";
+  else if(low>high+1) v+=" You tended to rate lower than the guide: remember that a 3 is strong, reliable performance, and one slip rarely changes a rating.";
+  $("verdict").textContent=v;
+  $("sExact").textContent=exact; $("sOne").textContent=one; $("sTwo").textContent=two;
+  $("review").innerHTML=answers.map(a=>`<tr><td>${esc(a.q.c)}</td><td>${esc(a.q.t)}</td><td class="n">${a.pick}</td><td class="n ${a.pick===a.q.a?"match":"miss"}">${a.q.a}</td></tr>`).join("");
+  $("other").textContent=track==="delivery"?"Try the non-delivery scenarios":"Try the delivery scenarios";
+  $("barfill").style.width="100%";
+  show("results"); window.scrollTo(0,0);
+}
+$("retake").addEventListener("click",()=>start(track));
+$("other").addEventListener("click",()=>start(track==="delivery"?"nondelivery":"delivery"));
+
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+</script>
+</body>
+</html>
